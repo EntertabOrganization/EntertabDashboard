@@ -2,18 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogIn } from "lucide-react";
+import { LogIn, Mail, Lock, Eye, EyeOff, AlertCircle, Leaf, Sparkles, ArrowRight } from "lucide-react";
 import { setSessionToken } from "@/lib/auth/session";
 import { getPublicBase } from "@/lib/api/client";
 import { loginAdmin } from "@/lib/api/entertab";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import styles from "./page.module.css";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Prefill the email and password by default to match Swagger Try It Out / Demo Credentials
+  const [email, setEmail] = useState("admin@entertab.com");
+  const [password, setPassword] = useState("admin123");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const apiBase = getPublicBase();
+  const isApiConfigured = !!apiBase;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,85 +36,149 @@ export default function LoginPage() {
     }
   }
 
+  // Quick autofill function for the demo section
+  function handleAutofill() {
+    setEmail("admin@entertab.com");
+    setPassword("admin123");
+    setError("");
+  }
+
   return (
-    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 20 }}>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: "100%",
-          maxWidth: 420,
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius)",
-          boxShadow: "var(--shadow)",
-          padding: 24
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 14,
-              display: "grid",
-              placeItems: "center",
-              background: "var(--primary-soft)",
-              color: "var(--primary)"
-            }}
-          >
-            <LogIn size={22} strokeWidth={1.75} />
+    <div className={styles.container}>
+      {/* Ambient background glows */}
+      <div className={styles.glowBlob1} aria-hidden="true" />
+      <div className={styles.glowBlob2} aria-hidden="true" />
+
+      {/* Glassmorphic card */}
+      <main className={styles.card}>
+        <div className={styles.header}>
+          <div className={styles.logoWrapper} aria-hidden="true">
+            <Leaf size={24} strokeWidth={2} />
           </div>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 22 }}>Welcome back</h1>
-            <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>Sign in with your admin account</p>
+          <h1 className={styles.title}>Entertab Admin</h1>
+          <p className={styles.subtitle}>
+            Sign in to manage service requests, inquiries, and career applications
+          </p>
+          
+          <div className={styles.apiStatus}>
+            <span className={`${styles.statusDot} ${!isApiConfigured ? styles.statusDotError : ""}`} />
+            <span>API: {apiBase ? apiBase : "Not Configured"}</span>
           </div>
         </div>
 
-        <p style={{ color: "var(--muted)", fontSize: 12, marginTop: 0 }}>API: {getPublicBase() || "not configured"}</p>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Error Banner */}
+          {error && (
+            <div className={styles.errorAlert} role="alert">
+              <AlertCircle size={20} style={{ flexShrink: 0, marginTop: 1 }} />
+              <div>{error}</div>
+            </div>
+          )}
 
-        <label style={{ fontSize: 13, color: "var(--muted)" }}>Email</label>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          required
-          autoComplete="email"
-          style={{ width: "100%", margin: "6px 0 14px", padding: 12, borderRadius: 10, border: "1px solid var(--border)" }}
-        />
+          {/* Email input field */}
+          <div className={styles.fieldGroup}>
+            <label htmlFor="email-input" className={styles.label}>
+              Email Address
+            </label>
+            <div className={styles.inputWrapper}>
+              <input
+                id="email-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                placeholder="admin@entertab.com"
+                className={styles.inputField}
+                disabled={loading}
+              />
+              <span className={styles.inputIcon}>
+                <Mail size={18} strokeWidth={2} />
+              </span>
+            </div>
+          </div>
 
-        <label style={{ fontSize: 13, color: "var(--muted)" }}>Password</label>
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          type="password"
-          required
-          autoComplete="current-password"
-          style={{ width: "100%", margin: "6px 0 14px", padding: 12, borderRadius: 10, border: "1px solid var(--border)" }}
-        />
+          {/* Password input field */}
+          <div className={styles.fieldGroup}>
+            <label htmlFor="password-input" className={styles.label}>
+              Password
+            </label>
+            <div className={styles.inputWrapper}>
+              <input
+                id="password-input"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className={styles.inputField}
+                disabled={loading}
+              />
+              <span className={styles.inputIcon}>
+                <Lock size={18} strokeWidth={2} />
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={styles.eyeButton}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
+                disabled={loading}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
 
-        {error ? <p style={{ color: "#b91c1c", fontSize: 14 }}>{error}</p> : null}
+          {/* Demo Access Helper Panel */}
+          <div className={styles.demoSection}>
+            <div className={styles.demoHeader}>
+              <div className={styles.demoTitle}>
+                <Sparkles size={13} />
+                <span>Demo Access</span>
+              </div>
+              <button
+                type="button"
+                className={styles.autofillButton}
+                onClick={handleAutofill}
+                title="Autofill credentials"
+              >
+                Autofill
+              </button>
+            </div>
+            <ul className={styles.demoInfo}>
+              <li className={styles.demoInfoItem}>
+                <span>Email:</span>
+                <span className={styles.demoValue}>admin@entertab.com</span>
+              </li>
+              <li className={styles.demoInfoItem}>
+                <span>Password:</span>
+                <span className={styles.demoValue}>admin123</span>
+              </li>
+            </ul>
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: 12,
-            border: "none",
-            background: "var(--primary)",
-            color: "#fff",
-            borderRadius: 10,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            fontWeight: 600
-          }}
-        >
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+          {/* Submit Action */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles.submitButton}
+          >
+            {loading ? (
+              <>
+                <span className={styles.spinner} aria-hidden="true" />
+                <span>Securing connection...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In to Dashboard</span>
+                <ArrowRight size={18} className={styles.btnArrow} />
+              </>
+            )}
+          </button>
+        </form>
+      </main>
     </div>
   );
 }
