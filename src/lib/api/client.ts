@@ -35,6 +35,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const { token, headers: initHeaders, body, ...rest } = options;
   const headers = new Headers(initHeaders ?? {});
 
+  // Set Accept header for JSON responses
+  if (!headers.has("Accept")) headers.set("Accept", "application/json");
+
   if (!(body instanceof FormData)) {
     if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   }
