@@ -70,6 +70,7 @@ export const SERVICE_TYPES = [
   "Brand Building",
   "UI/UX Design",
   "Digital Marketing",
+  "SEO",
   "Marketing Content Writing",
   "Social Media Management"
 ] as const;
@@ -83,6 +84,7 @@ export const PROJECT_SERVICES = [
   "Contact Center Solutions",
   "UI/UX Design",
   "Digital Marketing",
+  "SEO",
   "Marketing Content Writing",
   "Social Media Management"
 ] as const;
